@@ -1,16 +1,22 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 
 #define MAX_LINE_LENGTH 1000
 
-int parse_lines_as_int(char* path, int* lines, int max_lines) {
+int map_lines(
+    char* path,
+    intptr_t* results,
+    int max_results,
+    intptr_t (*map_fun)(char* line)
+) {
     FILE* f = fopen(path, "r");
 
-    int lines_count = 0;
+    int results_count = 0;
     char* line;
 
     while (1) {
-        line = malloc(MAX_LINE_LENGTH * sizeof(char));
+        line = (char*) malloc(MAX_LINE_LENGTH * sizeof(char));
         fgets(line, MAX_LINE_LENGTH, f) != NULL;
 
         if (line == NULL) {
@@ -18,15 +24,15 @@ int parse_lines_as_int(char* path, int* lines, int max_lines) {
             break;
         }
 
-        lines[lines_count] = atoi(line);
-        lines_count++;
+        results[results_count] = (intptr_t) map_fun(line);
+        results_count++;
 
-        if (lines_count >= max_lines) {
+        if (results_count >= max_results) {
             break;
         }
     }
 
     fclose(f);
 
-    return lines_count;
+    return results_count;
 }
