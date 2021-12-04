@@ -17,9 +17,8 @@ int map_lines(
 
     while (1) {
         line = (char*) malloc(MAX_LINE_LENGTH * sizeof(char));
-        fgets(line, MAX_LINE_LENGTH, f) != NULL;
 
-        if (line == NULL) {
+        if (fgets(line, MAX_LINE_LENGTH, f) == NULL) {
             free(line);
             break;
         }
