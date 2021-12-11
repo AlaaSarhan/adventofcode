@@ -23,7 +23,12 @@ int map_lines(
             break;
         }
 
-        results[results_count] = (intptr_t) map_fun(line);
+        intptr_t result = (intptr_t) map_fun(line);
+        if (!result) {
+            continue;
+        }
+
+        results[results_count] = result;
         results_count++;
 
         if (results_count >= max_results) {
