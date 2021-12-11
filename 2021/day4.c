@@ -10,7 +10,23 @@ typedef struct board_struct {
     int* row_sums;
     int* col_sums;
     int* row_markings;
+    int winning_number;
 } board;
+
+void print_board(board* board) {
+    for (int r = 0; r < BOARD_SIZE; r++) {
+        for (int c = 0; c < BOARD_SIZE; c++) {
+            int mark = 1 << c;
+            if (mark & board->row_markings[r]) {
+                printf(" [%2d] ", board->cells[r][c]);
+            } else {
+                printf("  %2d  ", board->cells[r][c]);
+            }
+        }
+        printf("\n");
+    }
+    printf("winning number: %d\n\n", board->winning_number);
+}
 
 int numbers_count = 0;
 board* current_board = NULL;
@@ -36,6 +52,7 @@ intptr_t build_input_and_boards(char* line) {
         current_board->row_sums = (int*) calloc(BOARD_SIZE, sizeof(int));
         current_board->row_markings = (int*) calloc(BOARD_SIZE, sizeof(int));
         current_board->cells = (int**) calloc(BOARD_SIZE, sizeof(int*));
+        current_board->winning_number = -1;
         for (int i = 0; i < BOARD_SIZE; i++) {
             current_board->cells[i] = (int*) calloc(BOARD_SIZE, sizeof(int));
         }
@@ -56,7 +73,7 @@ intptr_t build_input_and_boards(char* line) {
     }
 }
 
-int sum_unmakred_cells(board* board) {
+int calc_board_score(board* board) {
     int unmarked_sum = 0;
     for (int r = 0; r < BOARD_SIZE; r++) {
         for (int c = 0; c < BOARD_SIZE; c++) {
@@ -67,41 +84,49 @@ int sum_unmakred_cells(board* board) {
             unmarked_sum += board->cells[r][c];
         }
     }
-    return unmarked_sum;
+    return board->winning_number * unmarked_sum;
 }
 
-void part1(int* numbers, int numbers_count, board** boards, int boards_count) {
+void solve(int* numbers, int numbers_count, board** boards, int boards_count) {
+    board* last_winning_board = NULL;
     for (int i = 0; i < numbers_count; i++) {
         int number = numbers[i];
         for (int j = 0; j < boards_count; j++) {
-            board board = *boards[j];
+            board* board = boards[j];
 
-            for (int r = 0; r < BOARD_SIZE; r++) {
-                for (int c = 0; c < BOARD_SIZE; c++) {
-                    int cell = board.cells[r][c];
+            for (int r = 0; board->winning_number < 0 && r < BOARD_SIZE; r++) {
+                for (int c = 0; board->winning_number < 0 && c < BOARD_SIZE; c++) {
+                    int cell = board->cells[r][c];
 
                     if (cell == number) {
                         int mark = 1 << c;
-                        board.row_markings[r] |= mark;
+                        board->row_markings[r] |= mark;
 
-                        board.col_sums[c] += 1;
-                        board.row_sums[r] += 1;
+                        board->col_sums[c] += 1;
+                        board->row_sums[r] += 1;
 
-                        if (board.col_sums[c] == BOARD_SIZE ||
-                            board.row_sums[r] == BOARD_SIZE) {
-                                int score = number * sum_unmakred_cells(&board);
-                                printf("Part 1: %d", score);
-                                return;
+                        if (board->col_sums[c] == BOARD_SIZE ||
+                            board->row_sums[r] == BOARD_SIZE
+                        ) {
+                            board->winning_number = number;
+                            if (last_winning_board == NULL) {
+                                int score = calc_board_score(board);
+                                printf("Part 1: %d\n", score);
                             }
+                            last_winning_board = board;
+                            
+                            print_board(board);
+                        }
                     }
                 }
             }
         }
     }
-}
 
-void part2() {
-    
+    if (last_winning_board) {
+        int score = calc_board_score(last_winning_board);
+        printf("Part 2: %d\n", score);
+    }
 }
 
 void main() {
@@ -112,6 +137,5 @@ void main() {
     board** boards = (board**) (results + 1);
     int boards_count = results_count - 1;
 
-    part1(numbers, numbers_count, boards, boards_count);
-    part2();
+    solve(numbers, numbers_count, boards, boards_count);
 }
