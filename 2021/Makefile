@@ -1,2 +1,2 @@
 %.out: %.c includes/*.c
-	cc -I$(shell pwd)/include202s -Wreturn-local-addr -Wimplicit-function-declaration -g -o $@ $<
+	gcc -I$(shell pwd)/include202s -std=c2x -Wreturn-local-addr -Wimplicit-function-declaration -g -o $@ $<

@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 
-#define MAX_LINE_LENGTH 1000
+#define MAX_LINE_LENGTH 2000
 
 int map_lines(
     char* path,
