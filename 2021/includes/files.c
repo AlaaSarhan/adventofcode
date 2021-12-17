@@ -4,6 +4,14 @@
 
 #define MAX_LINE_LENGTH 2000
 
+char* read_first_line(char* path) {
+    FILE* f = fopen(path, "r");
+    char* line = (char*) malloc(MAX_LINE_LENGTH * sizeof(char));
+    fgets(line, MAX_LINE_LENGTH, f);
+
+    return line;
+}
+
 int map_lines(
     char* path,
     intptr_t* results,
@@ -19,7 +27,6 @@ int map_lines(
         line = (char*) malloc(MAX_LINE_LENGTH * sizeof(char));
 
         if (fgets(line, MAX_LINE_LENGTH, f) == NULL) {
-            free(line);
             break;
         }
 
