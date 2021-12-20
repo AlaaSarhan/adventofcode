@@ -23,8 +23,9 @@ MEMORY_BUCKET* constrcut_fish(char* input) {
     return fish;
 }
 
-void sum_by_age(intptr_t element, intptr_t extra) {
+intptr_t sum_by_age(intptr_t element, intptr_t extra, intptr_t accumulator) {
     ((uintmax_t*) extra)[*((int*) element)]++;
+    return accumulator;
 }
 
 uintmax_t sum_fish(uintmax_t* counts_by_age) {

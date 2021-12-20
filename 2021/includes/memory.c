@@ -39,28 +39,43 @@ MEMORY_BUCKET* mb_add_element(MEMORY_BUCKET* root, intptr_t element, uintmax_t n
     return current;
 }
 
-void mb_for_each(MEMORY_BUCKET* root, void (*fun)(intptr_t, intptr_t), intptr_t extra_arg) {
+intptr_t mb_for_each(MEMORY_BUCKET* root, intptr_t (*fun)(intptr_t, intptr_t, intptr_t), intptr_t extra_arg) {
+    intptr_t accumulator = 0;
+
     if (root == NULL) {
-        return;
+        accumulator;
     }
 
     MEMORY_BUCKET* current = root;
     while(current) {
         for (int i = 0; i < current->count; i++) {
-            fun(current->elements[i], extra_arg);
+            accumulator = fun(current->elements[i], extra_arg, accumulator);
         }
 
         current = current->next;
     }
+
+    return accumulator;
 }
 
-intmax_t mb_count_elements(MEMORY_BUCKET* root) {
-    int count = 0;
+uintmax_t mb_count_elements(MEMORY_BUCKET* root) {
+    uintmax_t count = 0;
     while (root != NULL) {
         count += root->count;
         root = root->next;
     }
 
     return count;
+}
+
+intptr_t _insert_in_array(intptr_t element, intptr_t arr, intptr_t arr_count) {
+    *(((intptr_t*) arr) + arr_count) = element;
+    return arr_count + 1;
+}
+intptr_t* mb_to_array(MEMORY_BUCKET* root, uintmax_t* count) {
+    *count = mb_count_elements(root);
+    intptr_t* arr = (intptr_t*) calloc(*count, sizeof(intptr_t));
+    mb_for_each(root, &_insert_in_array, (intptr_t) arr);
+    return arr;
 }
 #endif
