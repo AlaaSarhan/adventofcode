@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 
-#define MAX_LINE_LENGTH 2000
+#define MAX_LINE_LENGTH 5000
 
 char* read_first_line(char* path) {
     FILE* f = fopen(path, "r");
