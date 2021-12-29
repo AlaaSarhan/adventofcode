@@ -12,6 +12,33 @@ char* read_first_line(char* path) {
     return line;
 }
 
+void remove_crlf(char* line) {
+    int l = strlen(line);
+    if (line[l - 1] == '\n') {
+        line[l - 1] = '\0';
+    }
+    if (line[l - 2] == '\r') {
+        line[l - 2] = '\0';
+    }
+}
+
+char* read_line(char* path, FILE **file) {
+    if (*file == NULL) {
+        *file = fopen(path, "r");
+    }
+
+    char* line = (char*) malloc(MAX_LINE_LENGTH * sizeof(char));
+
+    if (fgets(line, MAX_LINE_LENGTH, *file) == NULL) {
+        fclose(*file);
+        *file = NULL;
+        return NULL;
+    }
+
+    remove_crlf(line);
+    return line;
+}
+
 int map_lines(
     char* path,
     intptr_t* results,
