@@ -3,10 +3,27 @@
 #include <stdint.h>
 #include <string.h>
 #include "includes/files.c"
+#include "includes/memory.c"
 
 #define Z 10
 #define X 100
 #define Y 100
+
+uintmax_t scan_basin(bool wall[X][Y][2], bool visited[X][Y], int x, int y) {
+    visited[x][y] = true;
+
+    return 1 +
+        ((x > 0 && !wall[x-1][y][0] && !visited[x-1][y]) ? scan_basin(wall, visited, x-1, y) : 0) +
+        ((x < X - 1 && !wall[x+1][y][0] && !visited[x+1][y]) ? scan_basin(wall, visited, x+1, y) : 0) +
+        ((y > 0 && !wall[x][y-1][0] && !visited[x][y-1]) ? scan_basin(wall, visited, x, y-1) : 0) +
+        ((y < Y - 1 && !wall[x][y+1][0] && !visited[x][y+1]) ? scan_basin(wall, visited, x, y+1) : 0);
+}
+
+int comapre_basins(const void *basin1, const void *basin2) {
+    uintmax_t b1 = (uintmax_t) *((uintmax_t*) basin1);
+    uintmax_t b2 = (uintmax_t) *((uintmax_t*) basin2);
+    return b2 - b1;
+}
 
 void main() {
     bool terrain[Z][X][Y][2]; // z, x, y => [true, true] if low-point, [true, false] if not low-point, [false, false] if no point
@@ -60,17 +77,29 @@ void main() {
         }
     }
 
+    uintmax_t basin_sizes[526];
+    int basins_count = 0;
     int total_risk = 0;
+    bool visited[X][Y];
+    for (int x = 0; x < X; x++) {
+        for (int y = 0; y < Y; y++) {
+            visited[x][y] = false;
+        }
+    }
     for (int z = 0; z < Z; z++) {
         for (int x = 0; x < X; x++) {
             for (int y = 0; y < Y; y++) {
                 if (terrain[z][x][y][1]) {
-                    printf("counting %d, %d (%d) \n", x, y, z);
                     total_risk += z + 1;
+
+                    basin_sizes[basins_count++] = scan_basin(terrain[9], visited, x, y);
                 }
             }
         }
     }
 
+    qsort(basin_sizes, basins_count, sizeof(uintmax_t), &comapre_basins);
+
     printf("Part 1: %d\n", total_risk);
+    printf("Part 2: %lld\n", basin_sizes[0] * basin_sizes[1] * basin_sizes[2]);
 }
